@@ -1,16 +1,10 @@
-name: Psalm Security Scan (manual setup)
+name: PHP Security Check
 
 on:
   push:
-    branches: [ "1.x" ]
+    branches: [ "main" ]
   pull_request:
-    branches: [ "1.x" ]
-  schedule:
-    - cron: '43 4 * * 5'
-
-permissions:
-  contents: read
-  security-events: write
+    branches: [ "main" ]
 
 jobs:
   php-security:
@@ -20,19 +14,19 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Set up PHP
+      - name: Set up PHP 7.2
         uses: shivammathur/setup-php@v2
         with:
-          php-version: '8.2'
+          php-version: '7.2'
+          tools: composer
 
       - name: Install dependencies
+        run: composer install --no-progress
+
+      - name: Run PHPUnit tests
+        run: vendor/bin/phpunit
+
+      - name: Run Psalm (static analysis)
         run: |
-          composer install --no-progress
-
-      - name: Run Psalm
-        run: vendor/bin/psalm --output-format=github --report=results.sarif
-
-      - name: Upload SARIF to GitHub
-        uses: github/codeql-action/upload-sarif@v3
-        with:
-          sarif_file: results.sarif
+          composer require --dev vimeo/psalm
+          vendor/bin/psalm
