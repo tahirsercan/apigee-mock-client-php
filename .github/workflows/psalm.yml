@@ -1,0 +1,48 @@
+name: Psalm Security Scan
+
+on:
+  push:
+    branches: [ "1.x" ]
+  pull_request:
+    branches: [ "1.x" ]
+  schedule:
+    - cron: '39 14 * * 4'
+
+permissions:
+  contents: read
+
+jobs:
+  php-security:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      security-events: write
+      actions: read
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup PHP and Composer
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: 8.1
+          extensions: mbstring, xml
+          tools: composer
+
+      - name: Install Psalm globally
+        run: composer global require vimeo/psalm
+
+      - name: Initialize Psalm config if not exists
+        run: |
+          if [ ! -f psalm.xml ]; then
+            ~/.composer/vendor/bin/psalm --init src
+          fi
+
+      - name: Psalm Security Scan
+        uses: psalm/psalm-github-security-scan@f3e6fd9432bc3e44aec078572677ce9d2ef9c287
+
+      - name: Upload Security Analysis results to GitHub
+        uses: github/codeql-action/upload-sarif@v3
+        with:
+          sarif_file: results.sarif
