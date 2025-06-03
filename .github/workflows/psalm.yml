@@ -2,9 +2,9 @@ name: PHP Security Check
 
 on:
   push:
-    branches: [ "main" ]
+    branches: [ "1.X" ]
   pull_request:
-    branches: [ "main" ]
+    branches: [ "1.X" ]
 
 jobs:
   php-security:
