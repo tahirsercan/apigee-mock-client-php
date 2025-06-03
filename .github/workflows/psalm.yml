@@ -36,11 +36,12 @@ jobs:
       - name: Initialize Psalm config if not exists
         run: |
           if [ ! -f psalm.xml ]; then
-            ~/.composer/vendor/bin/psalm --init src
+            ~/.composer/vendor/bin/psalm --init --root=apigee-mock-client-php
           fi
 
-      - name: Psalm Security Scan
-        uses: psalm/psalm-github-security-scan@f3e6fd9432bc3e44aec078572677ce9d2ef9c287
+      - name: Run Psalm Security Scan
+        run: |
+          ~/.composer/vendor/bin/psalm --root=apigee-mock-client-php --output-format=sarif > results.sarif
 
       - name: Upload Security Analysis results to GitHub
         uses: github/codeql-action/upload-sarif@v3
